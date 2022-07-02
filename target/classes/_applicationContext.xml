@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+
+	<bean id="p1" class="spring.Prova" >
+		<constructor-arg index="0" value="Bazerla"></constructor-arg>
+		<property name="nome" value="Andrea"></property>
+	</bean>
+
+
+	<bean id="prova1"  class="spring.Prova" factory-method="createInstance"  scope="prototype">
+		<constructor-arg index="0" value="Bazerla"></constructor-arg>
+		<property name="nome" value="Andrea"></property>
+	</bean>
+	
+	
+
+
+</beans>

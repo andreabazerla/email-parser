@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+       ">
+
+	<context:property-placeholder
+		location="classpath:jdbc.properties, classpath:hibernate.properties" />
+
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+	<bean id="reader" class="reader.ReaderQueue" factory-method="getQueue" />
+
+	<bean id="writer" class="writer.WriterFile" factory-method="getPath" />
+
+	<bean id="validatorList" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="validatorID" />
+				<ref bean="validatorUser" />
+				<!-- <ref bean="validatorCognome" /> -->
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="validatorID" class="validator.ValidatorID" />
+	<bean id="validatorUser" class="validator.ValidatorUser" />
+	<bean id="validatorCognome" class="validator.ValidatorCognome" />
+
+	<bean id="parser" class="parser.ParserExtended">
+		<constructor-arg index="0" ref="reader" />
+		<constructor-arg index="1" ref="writer" />
+		<constructor-arg index="2" ref="resolverUserHibernate" />
+
+		<property name="validatorList" ref="validatorList"></property>
+		<property name="sessionFactory" ref="sessionFactory"></property>		
+	</bean>
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<!-- <property name="dataSource" ref="dataSource" />
+		<property name="annotatedClasses">
+			<list>
+				<value>model.User</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+				<prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+			</props>
+		</property>
+ -->
+		<property name="configurationClass">
+			<value>org.hibernate.cfg.AnnotationConfiguration
+			</value>
+		</property>
+		<property name="configLocation">
+			<value>hibernate.cfg.xml
+			</value>
+		</property>
+	</bean>
+
+	<bean id="dao" class="dao.UserBasicDAO">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<bean id="userService" class="service.UserBasicService">
+		<property name="userDao" ref="dao"></property>
+	</bean>
+
+	<bean id="resolverUserHibernate" class="resolver.ResolverUserHibernate">
+		<property name="userService" ref="userService"></property>
+	</bean>
+
+	<!-- <bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<tx:annotation-driven transaction-manager="transactionManager" /> -->
+
+</beans>
